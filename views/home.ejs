@@ -6,10 +6,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@300;400;500&family=Quicksand:wght@300..700&display=swap" 
+          rel="stylesheet">
     <title>Dad Jokes</title>
 </head>
 <body>
-    <h1>Capstone project - public API, initialized</h1>
+    <div class="all">
+
+        <div class="joke">
+            <h2 id="jokeid" class="dad_joke quicksand_medium"> <%= joke %></h2>
+        </div>
+
+        <div class="options quicksand_light">
+
+            <!-- first button -->
+            <form id="generateForm" action="/generate" method="GET"> 
+                <button class="quicksand_light" type="submit">Generate new</button>
+            </form>
+
+            <!-- select form -->
+            <div class="filter">
+                <form action="/filter" method="POST">
+                    <select class="quicksand_light" id="options" name="choose_category" onchange="this.form.submit()">
+                        <option value="" selected disabled hidden>Filter jokes</option>
+                        <option value="1">Cat jokes</option>
+                        <option value="2">Dog jokes</option>
+                        <option value="3">Sport jokes</option>
+                    </select>
+                </form>
+            </div>
+
+            <!-- second button -->
+            <form id="saveForm" action="/save" method="POST" class="save">
+                <button class="quicksand_light" type="submit">Save current joke</button>
+            </form>
+        </div>
+
+        <div class="information">
+                <h4 id="afterSaving" class="quicksand_light"></h4>
+            </div>
+    </div>
+
+
+    <script>
+        
+        const joke = <%- JSON.stringify(joke) %>;
+        document.getElementById("saveForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            fetch("/save", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({jokeKey: joke}),
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Joke sent succesfully");
+                } else {
+                    console.log("Problem with sending");
+                }
+            })
+            .catch(error => {console.error("Error: ", error)});
+        
+            document.getElementById("afterSaving").innerHTML = "Joke saved!";
+        });
+    </script>
     
 </body>
 </html>

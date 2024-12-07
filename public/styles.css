@@ -1,3 +1,56 @@
 body {
-    background-color: salmon;
+    background-image: url("images/alpaca_background.png");
+    background-size: cover;
+    background-position: center -10px;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
+
+.all {
+    height: 30vh;
+    display: flex;
+    flex-direction: column;
+    width: 1000px;
+}
+
+h2 {
+    font-size: 30px;
+}
+
+.joke {
+    display: flex;
+    justify-content: center;
+}
+
+.options {
+    display: flex;
+    justify-content: center;
+}
+
+.options * {
+    width: 200px;
+}
+
+.quicksand_light {
+    font-family: "Quicksand", serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 15px;
+}
+
+.quicksand_medium {
+    font-family: "Quicksand", serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+}
+
+.information {
+    display: flex;
+    justify-content: center;
+}
+
