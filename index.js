@@ -20,49 +20,66 @@ app.use(express.static("public"));
 app.use(express.urlencoded({extended: true}));
 
 app.get("/", async (req, res) => {
-    response = await axios.get("https://icanhazdadjoke.com/", {
+    const response = await axios.get("https://icanhazdadjoke.com/", {
         headers: {Accept: "application/json"}
     });
-    backendJoke = response.data.joke;
-    console.log(response);
+    const backendJoke = response.data.joke;
     res.render("home.ejs", {
         joke: backendJoke,
     })
 });
 
 app.get("/generate", async (req, res) => {
-    response = await axios.get("https://icanhazdadjoke.com/", {
-        headers: {Accept: "application/json"}
-    });
-    backendJoke = response.data.joke;
-    console.log(response);
-    res.render("home.ejs", {
-        joke: backendJoke,
-    })
+    try {
+        response = await axios.get("https://icanhazdadjoke.com/", {
+            headers: {Accept: "application/json"}
+        });
+        backendJoke = response.data.joke;
+        res.json({backendJoke});
+    } catch(error) {
+        console.error("Could not fetch a joke: ", error);
+        res.status(500).json({error: "Could not fetch a joke"})
+    }
 });
 
 app.post("/save", (req, res) => {
     let retreivedJoke = req.body.jokeKey;
-    savedJokes.push(retreivedJoke);
-    console.log("Saved Jokes: ", savedJokes);
-    res.status(200);
+    if (savedJokes.length == 0) {
+        savedJokes.push(retreivedJoke);
+    }
+    else if (retreivedJoke == savedJokes[savedJokes.length - 1]) {
+        console.log("Trying to save a joke that has been already saved");
+    }
+    else {
+        savedJokes.push(retreivedJoke);
+    }
+    res.status(200).send("Saved!!!");
 });
 
-app.post("/filter", (req, res) => {
+app.post("/filter", async (req, res) => {
+    try {
     choice = req.body.choose_category;
-    console.log("Choice: ", choice);
-    if (choice == 1) {
-        data = "Cat joke";
+    response = await axios.get(`https://icanhazdadjoke.com/search?term=${choice}`, {
+        headers: {Accept: "application/json"}
+    });
+    response = response.data.results;
+    let randomNumber = Math.floor(Math.random()*response.length);
+    backendJoke = response[randomNumber].joke;
+    res.json({backendJoke});
+
+    } catch(error) {
+        console.log("Could not fetch a joke from that category");
+        res.status(500).json({error: "Could not fetch a joke from that category"});
     }
-    else if (choice == 2) {
-        data = "Dog joke";
-    }
-    else if (choice  == 3) {
-        data = "Sport joke";
-    }
-    res.render("home.ejs", {
-        joke: data,
-    })
+
+});
+
+app.get("/saved", (req, res) => {
+    res.render("saved_jokes.ejs", {
+        savedJokesBackend: savedJokes,
+    });
+
+
 });
 
 

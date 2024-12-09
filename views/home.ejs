@@ -13,6 +13,7 @@
     <title>Dad Jokes</title>
 </head>
 <body>
+    <%- include ("navbar.ejs") %>
     <div class="all">
 
         <div class="joke">
@@ -22,26 +23,26 @@
         <div class="options quicksand_light">
 
             <!-- first button -->
-            <form id="generateForm" action="/generate" method="GET"> 
-                <button class="quicksand_light" type="submit">Generate new</button>
-            </form>
+            <button id="generateButton" class="quicksand_light">Generate new</button>
+
 
             <!-- select form -->
             <div class="filter">
-                <form action="/filter" method="POST">
-                    <select class="quicksand_light" id="options" name="choose_category" onchange="this.form.submit()">
-                        <option value="" selected disabled hidden>Filter jokes</option>
-                        <option value="1">Cat jokes</option>
-                        <option value="2">Dog jokes</option>
-                        <option value="3">Sport jokes</option>
+                <form id="filterform" method="POST">
+                    <select class="quicksand_light" id="options" name="choose_category">
+                        <option value="" selected disabled hidden>Joke from a category</option>
+                        <option value="dog">Dog joke</option>
+                        <option value="sport">Sport joke</option>
+                        <option value="pizza">Food joke</option>
+                        <option value="wife">Wife joke</option>
+                        <option value="friend">Friend joke</option>
                     </select>
                 </form>
             </div>
 
             <!-- second button -->
-            <form id="saveForm" action="/save" method="POST" class="save">
-                <button class="quicksand_light" type="submit">Save current joke</button>
-            </form>
+            <button id="saveButton" class="quicksand_light" type="submit">Save current joke</button>
+        
         </div>
 
         <div class="information">
@@ -51,14 +52,19 @@
 
 
     <script>
+        let currentJoke;
         
-        const joke = <%- JSON.stringify(joke) %>;
-        document.getElementById("saveForm").addEventListener("submit", function(event) {
+        // ----------------- saving a joke ------------------
+        document.getElementById("saveButton").addEventListener("click", function(event) {
+            let savingButton = event.target;
+            savingButton.disabled = true;
+            currentJoke = document.getElementById("jokeid").innerText;
+            console.log("Joke to be saved: ", currentJoke);
             event.preventDefault();
             fetch("/save", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({jokeKey: joke}),
+                body: JSON.stringify({jokeKey: currentJoke}),
             })
             .then(response => {
                 if (response.ok) {
@@ -67,10 +73,42 @@
                     console.log("Problem with sending");
                 }
             })
-            .catch(error => {console.error("Error: ", error)});
-        
+            .catch(error => {console.error("Error: ", error)})
+            .finally(() => {
+                savingButton.disabled = false;
+            });
             document.getElementById("afterSaving").innerHTML = "Joke saved!";
         });
+
+        // -------------- generating a joke -------------------
+        document.getElementById("generateButton").addEventListener("click", function() {
+            fetch("/generate")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("jokeid").innerText = data.backendJoke;
+                    document.getElementById("afterSaving").innerHTML = "";
+                })
+                .catch(error => console.error("Error: ", error));
+
+        });
+
+        // ----------------- filtering a joke ----------------------
+        document.getElementById("options").addEventListener("change", function() {
+            fetch("/filter", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `choose_category=${encodeURIComponent(this.value)}`,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("jokeid").innerText = data.backendJoke;
+                    document.getElementById("options").selectedIndex = 0;
+                    document.getElementById("afterSaving").innerHTML = "";
+                })
+                .catch(error => console.error("Error: ", error));
+            
+        });
+
     </script>
     
 </body>
